@@ -681,7 +681,6 @@ if Controls then
     local t = {}
     local s = ""
     if #strToParse > 0 then
-      local safety = 0
       
       -- first look for ranges of digits eg 1-4
       local matchRange = "([%d]+)%-([%d]+)"
@@ -709,12 +708,6 @@ if Controls then
         --remove the parsed part of the string
     		strToParse = strToParse:gsub(removeRange, "", 1)
         
-        --Loop Safety check
-    		safety = safety + 1
-    		if safety > 100 then --probably runaway error, I mean who's going to have more than 100 rooms on a wall or inputs being restricted?
-          print("parseTextBox() runaway error loop 1 safety count "..safety)
-          break
-        end
     	end
     end
     return t, s, strToParse
@@ -725,7 +718,6 @@ if Controls then
     local s = ""
     
     if #strToParse > 0 then
-      safety = 0
       local matchDigit = "%d+"
       --remove any crap on either side of the digit
       local removeDigit = "[^%d]*"..matchDigit.."[^%d]*" 
@@ -745,13 +737,6 @@ if Controls then
         
         --remove the parsed part of the string
     		strToParse = strToParse:gsub(removeDigit, "", 1)
-        
-        --Loop Safety check
-    		safety = safety + 1
-      	if safety > 100 then --probably runaway error, I mean who's going to have more than 100 rooms on a wall or inputs being restricted?
-          print("parseTextBox() runaway error loop 2 safety count "..safety)
-          break
-        end
     	end
     end
     return t, s
@@ -836,21 +821,17 @@ if Controls then
     
     local unvisitedRooms = getStartingRooms(wall)
     
-    local safetyA = 0 
     while #unvisitedRooms > 0 do
       local lowestRoom = 0
     	local startingRoom = unvisitedRooms[1]
     	local currentGroup = {}
     	local roomStack = {}      
-      local safetyB = 0
     	
-      safetyA = safetyA + 1
       table.insert(roomStack, startingRoom)
       
     	while #roomStack > 0 do
     		local currentRoom = table.remove(roomStack)
         
-        safetyB = safetyB + 1
     		table.insert(currentGroup, currentRoom)
         
     		for i, v in ipairs(unvisitedRooms) do
@@ -864,8 +845,6 @@ if Controls then
     				table.insert(roomStack, adjacentRoom)
     			end
     		end
-    		if safetyB > 50 then
-    			break end
     	end 
       
       table.sort(currentGroup)
@@ -886,8 +865,6 @@ if Controls then
       updateGroupValidInputs(group)
       --printtable("group "..currentGroup[1].." contains:", currentGroup)
       
-    	if safetyA > 50 then
-    		break end
     end
   end
   
