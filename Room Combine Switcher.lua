@@ -397,11 +397,11 @@ function GetControlLayout(props)
 	end
 
 
-	
+
 
 	for w = 1, wallQty, 1 do
 		tablePosY = currentPosY
-		
+
 		table.insert(graphics, {
 			Type = "Text",
 			Text = tostring(w),
@@ -875,6 +875,7 @@ if Controls then
   --\/\/  User Control Functions  \/\/--
 
   function userSwitch(input, room, state)
+    input, room = tonumber(input), tonumber(room)
     print("function start", "userSwitch", input, room, state)
     --user has requested to switch inputs
     
@@ -882,8 +883,13 @@ if Controls then
     local roomCurrentInput = rooms[room]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
     
+    --printtable("groupValidInputs", groupValidInputs)
+    --print(tablefind(groupValidInputs, input))
+    --print(state and tablefind(groupValidInputs, input))
+
     --if the button is on, and the user is allowed to switch to this input
     if state and tablefind(groupValidInputs, input) then
+
       --get the group this room belongs to
       local group = rooms[room]["group"]
       
@@ -893,7 +899,7 @@ if Controls then
       --switch this room back to itself
       --in the case of a button state being off, it gets switched on again, same input
       --in the case of a button state being on, but the input not being valid it maintains the currentInput
-      roomSwitch(roomCurrentInput, room, 1)
+      roomSwitch(roomCurrentInput, room, true)
     end
   end
   
@@ -1034,7 +1040,7 @@ if Controls then
   --\/\/  Event Handlers  \/\/-- 
   
   for r = 1, Properties["Rooms"].Value, 1 do
-    Controls["Room Select"][r].EventHandler = function(ctl) userSwitch(ctl.String, r, 1) end
+    Controls["Room Select"][r].EventHandler = function(ctl) userSwitch(ctl.String, r, true) end
     for i = 1, Properties["Inputs"].Value, 1 do
       Controls["Room "..r.." Input"][i].EventHandler = function(ctl) userSwitch(i, r, ctl.Boolean) end
     end
