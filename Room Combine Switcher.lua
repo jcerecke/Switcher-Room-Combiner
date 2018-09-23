@@ -7,6 +7,7 @@
 
 -- TO DO: Output on a pin per room, the group number
 -- TO DO: Output on multiple pins per group, the rooms T/F if they're part of that group
+-- TO DO: Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
 
 PluginInfo =
 {
