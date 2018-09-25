@@ -8,6 +8,8 @@
 -- TO DO: Output on a pin per room, the group number
 -- TO DO: Output on multiple pins per group, the rooms T/F if they're part of that group
 -- TO DO: Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
+-- TO DO: Allow user to specify own colours as properties.
+-- TO DO: Output/Input on a single pin all walls open & wall/room association info so downstream components don't need to run room finding algorithm.
 
 PluginInfo =
 {
