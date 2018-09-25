@@ -1,11 +1,11 @@
 # Switcher-Room-Combiner
-Switcher (multi-router) Room Combiner lua plugin for the QSC Q-SYS platform.
+Switcher Room Combiner lua plugin for the QSC Q-SYS platform.
 
 This plugin mimics the room combiner component build into Q-SYS designer except that instead of mixing audio (combining audio sources) it combines (syncronises) switchers.  In addition to this it features Input Restriction mode that allows each room to only have access to a user definable number of switcher inputs.  When rooms are combined, their own allowed inputs are added to the group's allowed inputs, and each room is able to access the inputs of the other.  When the rooms are separated again they will revert back to the lowest numbered allowed input in their list.
 
 Known limits - the room combine algorithm can become big and hits the execution limit when numbers of rooms, walls or room/wall associations gets too great.
 
-#To dos:
+# To dos:
 -- Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
 -- Set debug.sethook() to remove the execution limit after significant testing.
 -- Allow user to specify own colours as properties (or at runtime?)
