@@ -7,7 +7,7 @@
 
 local PluginInfo =
 {
-  Name = "Tools~Room Combine Switcher",
+  Name = "aaRoom Combine Switcher",
   Version = "0.91",
   Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
   Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
@@ -58,6 +58,11 @@ function GetProperties()
     {
       Name = "Custom Colours CSV",
       Type = "string",
+    },
+    {
+      Name = "Allow Toggle Off",
+      Type = "boolean",
+      Value = false,
     }
   }
   return props
@@ -793,18 +798,13 @@ if Controls then
     --print(state and tablefind(groupValidInputs, input))
 
     --if the button is on, and the user is allowed to switch to this input
-    if state and tablefind(groupValidInputs, input) then
+    if tablefind(groupValidInputs, input) then
 
       --get the group this room belongs to
       local group = rooms[room]["group"]
       
       --switch the group
       groupSwitch(input, group, state)
-    else
-      --switch this room back to itself
-      --in the case of a button state being off, it gets switched on again, same input
-      --in the case of a button state being on, but the input not being valid it maintains the currentInput
-      roomSwitch(roomCurrentInput, room, true)
     end
   end
   
