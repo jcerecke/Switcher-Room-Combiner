@@ -10,50 +10,50 @@
 -- TO DO: Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
 -- TO DO: Output/Input on a single pin all walls open & wall/room association info so downstream components don't need to run room finding algorithm.
 
-PluginInfo =
+local PluginInfo =
 {
-	Name = "Tools~Room Combine Switcher",
-	Version = "0.91",
-	Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
-	Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
-	ShowDebug = true,
+  Name = "Tools~Room Combine Switcher",
+  Version = "0.91",
+  Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
+  Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
+  ShowDebug = true,
 }
 
 function GetPrettyName(props)
-	return "Room Combine Switcher~v"..PluginInfo.Version.."~Joshua Cerecke"
+  return "Room Combine Switcher~v"..PluginInfo.Version.."~Joshua Cerecke"
 end
 
 function GetColor(props)
-	return { 191, 226, 249 } --Same colour as Room Combiner component
+  return { 191, 226, 249 } --Same colour as Room Combiner component
 end
 
 function GetProperties()
-	props = {
-		{
-			Name = "Rooms",
-			Type = "integer",
-			Min = 2,
-			Max = 256,
-			Value = 2,
-		},
-		{
-			Name = "Walls",
-			Type = "integer",
-			Min = 1,
-			Max = 256,
-			Value = 1,
-		},
-		{
-			Name = "Inputs",
-			Type = "integer",
-			Min = 2,
-			Max = 128,
-			Value = 2,
-		},
-		{
-			Name = "Input Restriction",
-		  Type = "boolean",
-		  Value = false,
+  local props = {
+    {
+      Name = "Rooms",
+      Type = "integer",
+      Min = 2,
+      Max = 256,
+      Value = 2,
+    },
+    {
+      Name = "Walls",
+      Type = "integer",
+      Min = 1,
+      Max = 256,
+      Value = 1,
+    },
+    {
+      Name = "Inputs",
+      Type = "integer",
+      Min = 2,
+      Max = 128,
+      Value = 2,
+    },
+    {
+      Name = "Input Restriction",
+      Type = "boolean",
+      Value = false,
     },
     {
       Name = "Use Custom Colours",
@@ -65,39 +65,39 @@ function GetProperties()
       Type = "string",
     }
   }
-	return props
+  return props
 end
 
 function GetControls(props)
-	ctrl = {}
-	table.insert(ctrl,
-		{
-			Name = "Wall Rooms",
-			ControlType = "Text",
-			Count = props["Walls"].Value,
-			UserPin = true,
-			PinStyle = "Both",
-		}
-	)
-	table.insert(ctrl,
-		{
-			Name = "Wall Opens",
-			ControlType = "Button",
-			ButtonType = "Toggle",
-			Count = props["Walls"].Value,
-			UserPin = true,
-			PinStyle = "Both",
-		}
-	)
-	table.insert(ctrl,
-		{
-			Name = "Room Select",
-			ControlType = "Text",
-			Count = props["Rooms"].Value,
-			UserPin = true,
-			PinStyle = "Both",
-		}
-	)
+  local ctrl = {}
+  table.insert(ctrl,
+    {
+      Name = "Wall Rooms",
+      ControlType = "Text",
+      Count = props["Walls"].Value,
+      UserPin = true,
+      PinStyle = "Both",
+    }
+  )
+  table.insert(ctrl,
+    {
+      Name = "Wall Opens",
+      ControlType = "Button",
+      ButtonType = "Toggle",
+      Count = props["Walls"].Value,
+      UserPin = true,
+      PinStyle = "Both",
+    }
+  )
+  table.insert(ctrl,
+    {
+      Name = "Room Select",
+      ControlType = "Text",
+      Count = props["Rooms"].Value,
+      UserPin = true,
+      PinStyle = "Both",
+    }
+  )
   table.insert(ctrl,
     {
       Name = "Room LED",
@@ -106,327 +106,324 @@ function GetControls(props)
       Count = props["Rooms"].Value,
       UserPin = false,
     })
-	for r = 1, props["Rooms"].Value, 1 do
-		table.insert(ctrl,
-			{
-				Name = "Room "..r.." Input",
-				ControlType = "Button",
-				ButtonType = "Toggle",
-				Count = props["Inputs"].Value,
-				UserPin = true,
-				PinStyle = "Both",
-			}
-		)
-	end
-	--if props["Input Restriction"].Value then
-		table.insert(ctrl, {
-			Name = "Restrict Mode",
-			ControlType = "Text",
-			Count = props["Rooms"].Value,
-		})
-		table.insert(ctrl, {
-			Name = "Restrict Inputs",
-			ControlType = "Text",
-			Count = props["Rooms"].Value,
-		})
-	--end
+  for r = 1, props["Rooms"].Value, 1 do
+    table.insert(ctrl,
+      {
+        Name = "Room "..r.." Input",
+        ControlType = "Button",
+        ButtonType = "Toggle",
+        Count = props["Inputs"].Value,
+        UserPin = true,
+        PinStyle = "Both",
+      }
+    )
+  end
+  --if props["Input Restriction"].Value then
+    table.insert(ctrl, {
+      Name = "Restrict Mode",
+      ControlType = "Text",
+      Count = props["Rooms"].Value,
+    })
+    table.insert(ctrl, {
+      Name = "Restrict Inputs",
+      ControlType = "Text",
+      Count = props["Rooms"].Value,
+    })
+  --end
 
-	--[[DEBUG USE ONLY
-	table.insert(ctrl, {
-		Name = "code",
-		ControlType = "Text",
-		Count = 1,
-		UserPin = true,
-		PinStyle = "Input",
-		})]]
+  --[[DEBUG USE ONLY
+  table.insert(ctrl, {
+    Name = "code",
+    ControlType = "Text",
+    Count = 1,
+    UserPin = true,
+    PinStyle = "Input",
+    })]]
 
-	return ctrl
+  return ctrl
 end
 
 function GetControlLayout(props)
-	local boxMargin, elementMargin = { 8, 8, 8, 8 }, { 20, 4, 4, 4 }
-	local boxIndent = { 40, 0, 0, 80 }
-	local tablePosX, tablePosY, currentPosY = 0, 0, 0
-	local top, right, bottom, left = 1, 2, 3, 4
+  local boxMargin, elementMargin = { 8, 8, 8, 8 }, { 20, 4, 4, 4 }
+  local boxIndent = { 40, 0, 0, 80 }
+  local tablePosX, tablePosY, currentPosY = 0, 0, 0
+  local top, right, bottom, left = 1, 2, 3, 4
 
-	local buttonSize = { 36, 16 }
-	local textboxSize = { 36, 16 }
-	local textDisplaySize = { 64, 16 }
+  local buttonSize = { 36, 16 }
+  local textboxSize = { 36, 16 }
+  local textDisplaySize = { 64, 16 }
   local ledSize = { 16, 16 }
-	local x, y = 1, 2
+  local x, y = 1, 2
 
-	local inQty = props["Inputs"].Value
-	local roomQty = props["Rooms"].Value
-	local wallQty = props["Walls"].Value
+  local inQty = props["Inputs"].Value
+  local roomQty = props["Rooms"].Value
+  local wallQty = props["Walls"].Value
 
-	local roomsBoxPos = { boxMargin[left] + boxIndent[left], boxMargin[top] }
-	local roomsBoxSize = { elementMargin[left] + elementMargin[right] + 
-						textboxSize[x] * roomQty,
-						elementMargin[top] + ledSize[y] + textboxSize[y] +
-						elementMargin[bottom] + elementMargin[top] +
-						buttonSize[y] * ( inQty + 1 ) + elementMargin[bottom]}
-	local inputsBoxPos = { boxMargin[left], boxMargin[top] + boxIndent[top] }
-	local inputsBoxSize = {elementMargin[left] + textDisplaySize[x] + 12 +
-						elementMargin[left] + textboxSize[x] * roomQty +
-						elementMargin[right],
-						elementMargin[top] + ledSize[y] + textDisplaySize[y] *
-						( inQty + 1 ) + elementMargin[bottom] }
-	local wallsBoxPos = { boxMargin[left], inputsBoxPos[y] + inputsBoxSize[y] +
-						boxMargin[top] }
-	local wallsBoxSize = {inputsBoxSize[x], elementMargin[top] +
-						(( wallQty // roomQty ) +
-						( wallQty % roomQty > 0 and 1 or 0 )) * 3 *
-						textboxSize[y] + elementMargin[bottom] }
-	layout = {}
-	graphics = {}
+  local roomsBoxPos = { boxMargin[left] + boxIndent[left], boxMargin[top] }
+  local roomsBoxSize = { elementMargin[left] + elementMargin[right] + 
+            textboxSize[x] * roomQty,
+            elementMargin[top] + ledSize[y] + textboxSize[y] +
+            elementMargin[bottom] + elementMargin[top] +
+            buttonSize[y] * ( inQty + 1 ) + elementMargin[bottom]}
+  local inputsBoxPos = { boxMargin[left], boxMargin[top] + boxIndent[top] }
+  local inputsBoxSize = {elementMargin[left] + textDisplaySize[x] + 12 +
+            elementMargin[left] + textboxSize[x] * roomQty +
+            elementMargin[right],
+            elementMargin[top] + ledSize[y] + textDisplaySize[y] *
+            ( inQty + 1 ) + elementMargin[bottom] }
+  local wallsBoxPos = { boxMargin[left], inputsBoxPos[y] + inputsBoxSize[y] +
+            boxMargin[top] }
+  local wallsBoxSize = {inputsBoxSize[x], elementMargin[top] +
+            (( wallQty // roomQty ) +
+            ( wallQty % roomQty > 0 and 1 or 0 )) * 3 *
+            textboxSize[y] + elementMargin[bottom] }
+  local layout = {}
+  local graphics = {}
 
-	currentPosY = roomsBoxPos[y] + elementMargin[top]
-	tablePosX = roomsBoxPos[x] + elementMargin[left]
-	for i = 1, inQty, 1 do
-		table.insert(graphics, {
-			Type = "Text",
-			Text = tostring(i),
-			HTextAlign = "Right",
-			Position = { inputsBoxPos[x] + elementMargin[left], inputsBoxPos[y] +
-						ledSize[y] + elementMargin[top] + textDisplaySize[y] * i + 1 },
-			Size = textDisplaySize,
-		})
-	end
-	for r = 1, roomQty, 1 do
-		tablePosY = currentPosY
+  currentPosY = roomsBoxPos[y] + elementMargin[top]
+  tablePosX = roomsBoxPos[x] + elementMargin[left]
+  for i = 1, inQty, 1 do
+    table.insert(graphics, {
+      Type = "Text",
+      Text = tostring(i),
+      HTextAlign = "Right",
+      Position = { inputsBoxPos[x] + elementMargin[left], inputsBoxPos[y] +
+            ledSize[y] + elementMargin[top] + textDisplaySize[y] * i + 1 },
+      Size = textDisplaySize,
+    })
+  end
+  for r = 1, roomQty, 1 do
+    tablePosY = currentPosY
 
-		table.insert(graphics, {
-			Type = "Text",
-			Text = tostring(r),
-			HTextAlign = "Center",
-			Size = textboxSize,
-			Position = { tablePosX, tablePosY }
-		})
+    table.insert(graphics, {
+      Type = "Text",
+      Text = tostring(r),
+      HTextAlign = "Center",
+      Size = textboxSize,
+      Position = { tablePosX, tablePosY }
+    })
 
-		tablePosY = tablePosY + textboxSize[y] + elementMargin[bottom] +
-					elementMargin[top]
+    tablePosY = tablePosY + textboxSize[y] + elementMargin[bottom] +
+          elementMargin[top]
 
     layout["Room LED "..r] = {
       Style = "Led",
-      Size = ledsize,
+      Size = ledSize,
       Position = { tablePosX + 10 , tablePosY },
     }
-    
+
     tablePosY = tablePosY + buttonSize[y]
 
-		layout["Room Select "..r] = {
-			Style = "Textbox",
-			Size = buttonSize,
-			Position = { tablePosX, tablePosY },
-			HTextAlign = "Center",
-			PrettyName = "Room "..r.."~Select",
+    layout["Room Select "..r] = {
+      Style = "Textbox",
+      Size = buttonSize,
+      Position = { tablePosX, tablePosY },
+      HTextAlign = "Center",
+      PrettyName = "Room "..r.."~Select",
       Legend = "1",
       Text = "1",
-		}
+    }
 
-		tablePosY = tablePosY + buttonSize[y]
+    tablePosY = tablePosY + buttonSize[y]
 
-		for i = 1, inQty, 1 do
-			layout["Room "..r.." Input "..i] = {
-				Style = "Button",
-				ButtonStyle = "Toggle",
-				Size = buttonSize,
-				Position = { tablePosX, tablePosY },
-				PrettyName = "Room "..r.."~Input "..i,
-			}
-			tablePosY = tablePosY + buttonSize[y]
-		end
-		
-		tablePosX = tablePosX + buttonSize[x]
-	end
+    for i = 1, inQty, 1 do
+      layout["Room "..r.." Input "..i] = {
+        Style = "Button",
+        ButtonStyle = "Toggle",
+        Size = buttonSize,
+        Position = { tablePosX, tablePosY },
+        PrettyName = "Room "..r.."~Input "..i,
+      }
+      tablePosY = tablePosY + buttonSize[y]
+    end
 
-	currentPosY = wallsBoxPos[y] + elementMargin[top]
-	tablePosX = wallsBoxPos[x] + elementMargin[left] + textDisplaySize[x] + 
-				12 + elementMargin[left]
+    tablePosX = tablePosX + buttonSize[x]
+  end
 
-	if props["Input Restriction"].Value then
-		local restrictBoxSize = { inputsBoxSize[x], elementMargin[top] +
-								textboxSize[y] * 2 + elementMargin[bottom] }
-		local restrictBoxPos = { wallsBoxPos[x], wallsBoxPos[y] }
-		wallsBoxPos[y] = wallsBoxPos[y] + restrictBoxSize[y] + boxMargin[bottom]
-		roomsBoxSize[y] = roomsBoxSize[y] + boxMargin[bottom] + restrictBoxSize[y]
-		
-		table.insert(graphics, {
-			Type = "GroupBox",
-			Text = "Input Restrict",
-			HTextAlign = "Left",
-			StrokeWidth = 1,
-			CornerRadius = 8,
-			Position = restrictBoxPos,
-			Size = restrictBoxSize,
-			})
-		table.insert(graphics, {
-			Type = "Text",
-			Text = "Mode",
-			HTextAlign = "Right",
-			Position = { restrictBoxPos[x] + elementMargin[left],
-						restrictBoxPos[y] + elementMargin[top] },
-			Size = textDisplaySize,
-			})
-		table.insert(graphics, {
-			Type = "Text",
-			Text = "Inputs",
-			HTextAlign = "Right",
-			Position = { restrictBoxPos[x] + elementMargin[left],
-						restrictBoxPos[y] + elementMargin[top] + textboxSize[y] },
-			Size = textDisplaySize,
-			})
+  currentPosY = wallsBoxPos[y] + elementMargin[top]
+  tablePosX = wallsBoxPos[x] + elementMargin[left] + textDisplaySize[x] + 
+        12 + elementMargin[left]
 
-		for r = 1, roomQty, 1 do
-			tablePosY = currentPosY
+  if props["Input Restriction"].Value then
+    local restrictBoxSize = { inputsBoxSize[x], elementMargin[top] +
+                textboxSize[y] * 2 + elementMargin[bottom] }
+    local restrictBoxPos = { wallsBoxPos[x], wallsBoxPos[y] }
+    wallsBoxPos[y] = wallsBoxPos[y] + restrictBoxSize[y] + boxMargin[bottom]
+    roomsBoxSize[y] = roomsBoxSize[y] + boxMargin[bottom] + restrictBoxSize[y]
 
-			layout["Restrict Mode "..r] = {
-				Style = "ComboBox",
-				Size = textboxSize,
-				Position = { tablePosX, tablePosY }
-				}
+    table.insert(graphics, {
+      Type = "GroupBox",
+      Text = "Input Restrict",
+      HTextAlign = "Left",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Position = restrictBoxPos,
+      Size = restrictBoxSize,
+      })
+    table.insert(graphics, {
+      Type = "Text",
+      Text = "Mode",
+      HTextAlign = "Right",
+      Position = { restrictBoxPos[x] + elementMargin[left],
+            restrictBoxPos[y] + elementMargin[top] },
+      Size = textDisplaySize,
+      })
+    table.insert(graphics, {
+      Type = "Text",
+      Text = "Inputs",
+      HTextAlign = "Right",
+      Position = { restrictBoxPos[x] + elementMargin[left],
+            restrictBoxPos[y] + elementMargin[top] + textboxSize[y] },
+      Size = textDisplaySize,
+      })
 
-			tablePosY = tablePosY + textboxSize[y]
+    for r = 1, roomQty, 1 do
+      tablePosY = currentPosY
 
-			layout["Restrict Inputs "..r] = {
-				Style = "Textbox",
-				Size = textboxSize,
-				Position = { tablePosX, tablePosY }
-				}
+      layout["Restrict Mode "..r] = {
+        Style = "ComboBox",
+        Size = textboxSize,
+        Position = { tablePosX, tablePosY }
+        }
 
-			tablePosX = tablePosX + textboxSize[x]
+      tablePosY = tablePosY + textboxSize[y]
 
-		end
+      layout["Restrict Inputs "..r] = {
+        Style = "Textbox",
+        Size = textboxSize,
+        Position = { tablePosX, tablePosY }
+        }
 
-		currentPosY = wallsBoxPos[y] + elementMargin[top]
-		tablePosX = wallsBoxPos[x] + elementMargin[left] + textDisplaySize[x] + 
-				12 + elementMargin[left]
-	end
+      tablePosX = tablePosX + textboxSize[x]
 
+    end
 
+    currentPosY = wallsBoxPos[y] + elementMargin[top]
+    tablePosX = wallsBoxPos[x] + elementMargin[left] + textDisplaySize[x] + 
+        12 + elementMargin[left]
+  end
 
+  for w = 1, wallQty, 1 do
+    tablePosY = currentPosY
 
-	for w = 1, wallQty, 1 do
-		tablePosY = currentPosY
+    table.insert(graphics, {
+      Type = "Text",
+      Text = tostring(w),
+      HTextAlign = "Centre",
+      Size = textboxSize,
+      Position = { tablePosX, tablePosY }
+      })
 
-		table.insert(graphics, {
-			Type = "Text",
-			Text = tostring(w),
-			HTextAlign = "Centre",
-			Size = textboxSize,
-			Position = { tablePosX, tablePosY }
-			})
+    tablePosY = tablePosY + textboxSize[y]
 
-		tablePosY = tablePosY + textboxSize[y]
+    layout[wallQty > 1 and "Wall Opens "..w or "Wall Opens"] = {
+      Style = "Button",
+      ButtonStyle = "Toggle",
+      Size = buttonSize,
+      Position = { tablePosX, tablePosY},
+      HTextAlign = "Centre",
+      PrettyName = "Wall "..w.."~Open",
+      }
 
-		layout[wallQty > 1 and "Wall Opens "..w or "Wall Opens"] = {
-			Style = "Button",
-			ButtonStyle = "Toggle",
-			Size = buttonSize,
-			Position = { tablePosX, tablePosY},
-			HTextAlign = "Centre",
-			PrettyName = "Wall "..w.."~Open",
-			}
-		
-		tablePosY = tablePosY + textboxSize[y]
-		
-		layout[wallQty > 1 and "Wall Rooms "..w or "Wall Rooms"] = {
-			Style = "Textbox",
-			Size = textboxSize,
-			Position = { tablePosX, tablePosY },
-			HTextAlign = "Centre",
-			PrettyName = "Wall "..w.."~Rooms",
-			}
-		
-		tablePosX = tablePosX + textboxSize[x]
-		
-		if w % roomQty == 1 then
-			table.insert(graphics, {
-				Type = "Text",
-				Text = "Open",
-				HTextAlign = "Right",
-				Size = textDisplaySize,
-				Position = { inputsBoxPos[x] + elementMargin[left],
-							currentPosY + textboxSize[y] }
-				})
-			table.insert(graphics, {
-				Type = "Text",
-				Text = "Rooms",
-				HTextAlign = "Right",
-				Size = textDisplaySize,
-				Position = { inputsBoxPos[x] + elementMargin[left],
-							currentPosY + textboxSize[y] * 2 }
-				})
-		end
-		if w % roomQty == 0 then	-- Add another row & wrap around
-			currentPosY = tablePosY + buttonSize[y]
-			tablePosX = wallsBoxPos[x] + textDisplaySize[x] + 12 +
-						elementMargin[left]
-		end
-		
-		tablePosY = currentPosY
-	end
-	
-		table.insert(graphics, {
-			Type = "GroupBox",
-			Text = "Rooms",
-			HTextAlign = "Left",
-			StrokeWidth = 1,
-			CornerRadius = 8,
-			Position = roomsBoxPos,
-			Size = roomsBoxSize,
+    tablePosY = tablePosY + textboxSize[y]
+
+    layout[wallQty > 1 and "Wall Rooms "..w or "Wall Rooms"] = {
+      Style = "Textbox",
+      Size = textboxSize,
+      Position = { tablePosX, tablePosY },
+      HTextAlign = "Centre",
+      PrettyName = "Wall "..w.."~Rooms",
+      }
+
+    tablePosX = tablePosX + textboxSize[x]
+
+    if w % roomQty == 1 then
+      table.insert(graphics, {
+        Type = "Text",
+        Text = "Open",
+        HTextAlign = "Right",
+        Size = textDisplaySize,
+        Position = { inputsBoxPos[x] + elementMargin[left],
+              currentPosY + textboxSize[y] }
+        })
+      table.insert(graphics, {
+        Type = "Text",
+        Text = "Rooms",
+        HTextAlign = "Right",
+        Size = textDisplaySize,
+        Position = { inputsBoxPos[x] + elementMargin[left],
+              currentPosY + textboxSize[y] * 2 }
+        })
+    end
+    if w % roomQty == 0 then	-- Add another row & wrap around
+      currentPosY = tablePosY + buttonSize[y]
+      tablePosX = wallsBoxPos[x] + textDisplaySize[x] + 12 +
+            elementMargin[left]
+    end
+
+    tablePosY = currentPosY
+  end
+
+    table.insert(graphics, {
+      Type = "GroupBox",
+      Text = "Rooms",
+      HTextAlign = "Left",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Position = roomsBoxPos,
+      Size = roomsBoxSize,
     })
-		table.insert(graphics, {
-			Type = "GroupBox",
-			Text = "Inputs",
-			HTextAlign = "Left",
-			StrokeWidth = 1,
-			CornerRadius = 8,
-			Position = inputsBoxPos,
-			Size = inputsBoxSize,
+    table.insert(graphics, {
+      Type = "GroupBox",
+      Text = "Inputs",
+      HTextAlign = "Left",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Position = inputsBoxPos,
+      Size = inputsBoxSize,
     })
     table.insert(graphics, {
       Type = "Text",
       Text = "Combined",
       HTextAlign = "Right",
       Position =  { inputsBoxPos[x] + elementMargin[left], inputsBoxPos[y] +
-						 elementMargin[top] },
+            elementMargin[top] },
       Size = textDisplaySize,
     })
-		table.insert(graphics, {
-			Type = "Text",
-			Text = "Select",
-			HTextAlign = "Right",
-			Position = { inputsBoxPos[x] + elementMargin[left], inputsBoxPos[y] +
-						ledSize[y] + elementMargin[top] },
-			Size = textDisplaySize,
+    table.insert(graphics, {
+      Type = "Text",
+      Text = "Select",
+      HTextAlign = "Right",
+      Position = { inputsBoxPos[x] + elementMargin[left], inputsBoxPos[y] +
+            ledSize[y] + elementMargin[top] },
+      Size = textDisplaySize,
     })
-		table.insert(graphics, {
-			Type = "GroupBox",
-			Text = "Walls",
-			HTextAlign = "Left",
-			StrokeWidth = 1,
-			CornerRadius = 8,
-			Position = wallsBoxPos,
-			Size = { wallsBoxSize[x], wallsBoxSize[y] }
-			})
+    table.insert(graphics, {
+      Type = "GroupBox",
+      Text = "Walls",
+      HTextAlign = "Left",
+      StrokeWidth = 1,
+      CornerRadius = 8,
+      Position = wallsBoxPos,
+      Size = { wallsBoxSize[x], wallsBoxSize[y] }
+      })
 
-		--DEV ONLY REMOVE LATER
-		layout["code"] = {
-			Style = "Textbox",
-			Size = buttonSize,
-			Position = { 0, 0 },
-		}
+    --DEV ONLY REMOVE LATER
+    layout["code"] = {
+      Style = "Textbox",
+      Size = buttonSize,
+      Position = { 0, 0 },
+    }
 
-	return layout, graphics
+  return layout, graphics
 end
 
 function GetPins(props)
-	return {}
+  return {}
 end
 
 function GetComponents(props)
-	return {}
+  return {}
 end
 
 function GetWiring(props)
@@ -442,7 +439,7 @@ if Controls then
       Controls[i][1] = c
     end
   end
-  
+
   --\/\/  Helper Functions  \/\/--
 
   function split(str,pat)
@@ -461,45 +458,45 @@ if Controls then
       x = ""
     end
   end
-  
+
   function printtable(prefix, t)
-  	local x = ""
-  		for i, v in ipairs(t) do
-  			x = x..tostring(v).."\t"
-  		end
-  	print(prefix, x)
+    local x = ""
+      for i, v in ipairs(t) do
+        x = x..tostring(v).."\t"
+      end
+    print(prefix, x)
   end
-  
+
   function printwalls()
     for w = 1, Properties["Walls"].Value do
       print (wallsState[w])
     end
   end
-    
+
   function tablefind(t, f) -- find element v of t satisfying f(v)
-  	for _, v in ipairs(t) do
-  	  if f == v then
-  		  return v
-  	  end
-  	end
-  	return nil
+    for _, v in ipairs(t) do
+      if f == v then
+        return v
+      end
+    end
+    return nil
   end
-  
+
   function tableconcat(t1, t2) -- t2 gets added onto the end of t1, removes duplicates
     for _, v in ipairs(t2) do
       if not tablefind(t1, v) then table.insert(t1, v) end
     end
   end
-  
+
   --/\/\  Helper Functions  /\/\--
-  
+
   --\/\/  Program Functions  \/\/--
-  
+
   function groupInputSync(group)
     print("function start", "groupInputSync", group)
     local masterRoomInput = rooms[group]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
-    
+
     --if the group's masterRoom currentInput is not in group's validInputs
     if not tablefind(groupValidInputs, masterRoomInput) then
       --update the first/only room's currentInput
@@ -508,24 +505,24 @@ if Controls then
     --trigger a group switch to the validInput
     groupSwitch(masterRoomInput, group, 1)
   end
-  
+
   function updateRoomValidInputs(room)
     print("function start", "updateRoomValidInputs", room)
     local mode = rooms[room]["restrictionMode"]
     print("the restriction mode is "..mode)
-    
+
     local totalInputs = Properties["Inputs"].Value
     local roomRestrictionInputs = rooms[room]["restrictionInputs"]
-    
+
     --start building new validInputs table from scratch
     local roomValidInputs = {}
-    
+
     if mode == bypass then --add all available inputs to allowed list.
       for input = 1, totalInputs do
         table.insert(roomValidInputs, input)
       end
     else --read restricted inputs
-      
+
       if mode == allow then --and add only those in the inputs box to the allowed list.
         for _, input in ipairs(roomRestrictionInputs) do
           if input > 0 and input <= totalInputs then -- if valid input
@@ -542,17 +539,17 @@ if Controls then
     end
     printtable("function end\tupdateRoomValidInputs", roomValidInputs)
     rooms[room]["validInputs"] = roomValidInputs
-    
+
     --pass this new info onto the group
     updateGroupValidInputs(rooms[room]["group"])
   end    
-  
+
   function updateGroupValidInputs(group)
     print("function start", "updateGroupValidInputs", group)
     --start with a blank table
     local groupValidInputs = {}
     local groupMembers = groups[group]["members"]
-    
+
     --for each room in the group
     for _, room in ipairs(groupMembers) do
       --look at room validInputs and add to group validInputs
@@ -562,7 +559,7 @@ if Controls then
         end
       end
     end
-    
+
     groups[group]["validInputs"] = groupValidInputs
     printtable("function end\tupdateGroupValidInputs", groupValidInputs)
     --now that the valid inputs have been updated, let's check the group's current inputs for validity
@@ -571,7 +568,7 @@ if Controls then
 
   function roomSwitch(input, room, state) -- Create radio buttons.  Thanks to Callum Brieske.
     print("function start", "roomSwitch", input, room, state)
-    
+
     input, room = tonumber(input), tonumber(room)
     --for each input button for the room
     for i, v in ipairs(Controls["Room "..room.." Input"]) do
@@ -585,134 +582,132 @@ if Controls then
   function groupSwitch(input, group, state)
     print("function start", "groupSwitch", input, group, state)
     --switch all rooms in this group to the input
-    
+
     for _, room in ipairs(groups[group]["members"]) do
       roomSwitch(input, room, state)
     end
   end
-  
+
   function parseRange(strToParse, max)
     local t = {}
     local s = ""
     if #strToParse > 0 then
-      
+
       -- first look for ranges of digits eg 1-4
       local matchRange = "([%d]+)%-([%d]+)"
       -- remove any crap at the start plus the matchRange
       local removeRange = "[^%d]*"..matchRange
-      
+
       while(strToParse:match(matchRange)) do
-      
-    		local rangeA, rangeB = strToParse:match(matchRange)
+
+        local rangeA, rangeB = strToParse:match(matchRange)
         rangeA, rangeB = tonumber(rangeA), tonumber(rangeB)
-        
+
         --build the string to return
-        
+
         --math.min/max used in case someone entered a range with decending digits and to keep range inside 1 to max.
         local rangeMin = math.max(1, math.min(rangeA, rangeB))
         local rangeMax = math.min(max, math.max(rangeA, rangeB))
         --sanitise string output
         s = s == "" and s..tostring(rangeMin).."-"..tostring(rangeMax) or s..", "..tostring(rangeMin).."-"..tostring(rangeMax)
-        
+
         --add each digit to the table
         for digit = rangeMin, rangeMax do
           if digit > 0 then table.insert(t, digit) end
         end
-        
+
         --remove the parsed part of the string
-    		strToParse = strToParse:gsub(removeRange, "", 1)
-        
-    	end
+        strToParse = strToParse:gsub(removeRange, "", 1)
+
+      end
     end
     return t, s, strToParse
   end
-  
+
   function parseDigits(strToParse, max)
     local t = {}
     local s = ""
-    
+
     if #strToParse > 0 then
       local matchDigit = "%d+"
       --remove any crap on either side of the digit
       local removeDigit = "[^%d]*"..matchDigit.."[^%d]*" 
-      
-    	while(strToParse:match(matchDigit)) do
+
+      while(strToParse:match(matchDigit)) do
         local digit = tonumber(strToParse:match(matchDigit))
-        
-        
-        
+
         if digit > 0 and digit <= max then
           --add each digit to the table
           table.insert(t, digit)
-          
+
           --build the string
           s = s == "" and s..strToParse:match(matchDigit) or s..", "..strToParse:match(matchDigit)
         end
-        
+
         --remove the parsed part of the string
-    		strToParse = strToParse:gsub(removeDigit, "", 1)
-    	end
+        strToParse = strToParse:gsub(removeDigit, "", 1)
+      end
     end
     return t, s
   end
-  
+
   function parseTextBox(strToParse, max)
     --look for ranges first and then digits
     local t1, t2 = {}, {}
     local s1, s2 = "", ""
     t1, s1, leftoverStr = parseRange(strToParse, max)
     t2, s2 = parseDigits(leftoverStr, max)
-    
+
     tableconcat(t1, t2)
     table.sort(t1)
-    
+
     local separator = ","
     if s1 == "" or s2 == "" then separator = "" end
     local s = s1..separator..s2
-    
+
     return t1, s
   end
-  
+
   function getAdjacentRooms(room)
     print("function start", "getAdjacentRooms", room)
-  	--print("function start on room"..room)
-  	local t = {}
-  	for wall, roomsTable in ipairs(map) do
-  		--print("w"..w, "rms"..tostring(rms))
+    --print("function start on room"..room)
+    local t = {}
+    for wall, roomsTable in ipairs(map) do
+      --print("w"..w, "rms"..tostring(rms))
       --print(wallsState[w])
-  		if wallsState[wall] and roomsTable[room] then --if the wall is open, and the room & wall are paired
-  			--print("rms[room] true")
-  			for r, path in ipairs(roomsTable) do
-  				--print("r"..r, "valid"..tostring(valid))
-  				if path and r ~= room then
-  					--print("valid and r isn't room")
-  					table.insert(t, r)
-  				end
-  			end
-  		end
-  	end
+      if wallsState[wall] and roomsTable[room] then --if the wall is open, and the room & wall are paired
+        --print("rms[room] true")
+        for r, path in ipairs(roomsTable) do
+          --print("r"..r, "valid"..tostring(valid))
+          if path and r ~= room then
+            --print("valid and r isn't room")
+            table.insert(t, r)
+          end
+        end
+      end
+    end
     printtable("function end\tgetAdjacentRooms", t)
-  	return t
+    return t
   end
-  
+
   function getStartingRooms(wall)
     print("function start", "getStartingRooms", wall)
-  	local t = {}
+    local t = {}
     if wall == 0 then -- special wall used on init, get all rooms
       for r = 1, Properties["Rooms"].Value do
         table.insert(t, r)
       end
     else
-    	for r, valid in ipairs(map[wall]) do
-    		if valid then
-    			table.insert(t, r)
-    		end
-    	end
+      for r, valid in ipairs(map[wall]) do
+        if valid then
+          table.insert(t, r)
+        end
+      end
     end
     printtable("function end\tgetStartingRooms", t)
-  	return t
+    return t
   end
-  
+
   function updateLEDs(group)
     print("function start updateLEDs("..tostring(group)..")")
     local groupMembers = groups[group]["members"]
@@ -738,29 +733,29 @@ if Controls then
     
     while #unvisitedRooms > 0 do
       local lowestRoom = 0
-    	local startingRoom = unvisitedRooms[1]
-    	local currentGroup = {}
-    	local roomStack = {}      
-    	
+      local startingRoom = unvisitedRooms[1]
+      local currentGroup = {}
+      local roomStack = {}      
+      
       table.insert(roomStack, startingRoom)
       
-    	while #roomStack > 0 do
-    		local currentRoom = table.remove(roomStack)
+      while #roomStack > 0 do
+        local currentRoom = table.remove(roomStack)
         
-    		table.insert(currentGroup, currentRoom)
+        table.insert(currentGroup, currentRoom)
         
-    		for i, v in ipairs(unvisitedRooms) do
-    			if v == currentRoom then
-    				table.remove(unvisitedRooms, i)
-    			end
-    		end
+        for i, v in ipairs(unvisitedRooms) do
+          if v == currentRoom then
+            table.remove(unvisitedRooms, i)
+          end
+        end
     
-    		for _, adjacentRoom in ipairs(getAdjacentRooms(currentRoom)) do
-    			if not tablefind(currentGroup, adjacentRoom) and not tablefind(roomStack, adjacentRoom) then
-    				table.insert(roomStack, adjacentRoom)
-    			end
-    		end
-    	end 
+        for _, adjacentRoom in ipairs(getAdjacentRooms(currentRoom)) do
+          if not tablefind(currentGroup, adjacentRoom) and not tablefind(roomStack, adjacentRoom) then
+            table.insert(roomStack, adjacentRoom)
+          end
+        end
+      end 
       
       table.sort(currentGroup)
       
@@ -938,7 +933,7 @@ if Controls then
       map[w][r] = tablefind(walls[w], r) and true or false
     end
   end
- 
+
   for w = 1, Properties["Walls"].Value do --can't run this above as map has not been generated yet.
     if wallsState[w] then
       findRoomGroups(w)
@@ -968,7 +963,7 @@ if Controls then
     end
     
     if Properties["Input Restriction"].Value then
-  	  Controls["Restrict Mode"][r].EventHandler = function(ctl) userRestrictModeChange(r, ctl.String) end
+      Controls["Restrict Mode"][r].EventHandler = function(ctl) userRestrictModeChange(r, ctl.String) end
       Controls["Restrict Inputs"][r].EventHandler = function(ctl) userRestrictInputsChange(r, ctl.String) end
     end
   end
