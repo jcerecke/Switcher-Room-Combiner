@@ -8,7 +8,7 @@
 PluginInfo =
 {
   Name = "Tools~Room Combine Switcher",
-  Version = "0.91",
+  Version = "0.92",
   Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
   Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
   ShowDebug = true,
@@ -58,6 +58,11 @@ function GetProperties()
     {
       Name = "Custom Colours CSV",
       Type = "string",
+    },
+    {
+      Name = "Allow Toggle Off",
+      Type = "boolean",
+      Value = false,
     }
   }
   return props
@@ -492,8 +497,8 @@ if Controls then
     local masterRoomInput = rooms[group]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
 
-    --if the group's masterRoom currentInput is not in group's validInputs
-    if not tablefind(groupValidInputs, masterRoomInput) then
+    --if the group's masterRoom currentInput is not in group's validInputs or the masterRoom currentInput is not nil, nil is always valid.
+    if not tablefind(groupValidInputs, masterRoomInput) and masterRoomInput ~= nil then
       --update the first/only room's currentInput
       masterRoomInput = groupValidInputs[1]
     end
@@ -565,13 +570,18 @@ if Controls then
     print("function start", "roomSwitch", input, room, state)
 
     input, room = tonumber(input), tonumber(room)
-    --for each input button for the room
-    for i, v in ipairs(Controls["Room "..room.." Input"]) do
-      v.Value = i == input and 1 or 0
+
+    if state then
+      --for each input button for the room
+      for i, v in ipairs(Controls["Room "..room.." Input"]) do
+        v.Value = i == input and 1 or 0
+      end
+    else
+      Controls["Room "..room.." Input"][input].Value = state
     end
     --update global variable and text
-    rooms[room]["currentInput"] = input
-    Controls["Room Select"][room].String = tostring(input) --tostring captures the nil setting
+    rooms[room]["currentInput"] = state and input or nil
+    Controls["Room Select"][room].String = tostring(state and input or nil)
   end
 
   function groupSwitch(input, group, state)
@@ -792,18 +802,15 @@ if Controls then
     --print(tablefind(groupValidInputs, input))
     --print(state and tablefind(groupValidInputs, input))
 
-    --if the button is on, and the user is allowed to switch to this input
-    if state and tablefind(groupValidInputs, input) then
+    --if the user is allowed to switch to this input
+    if tablefind(groupValidInputs, input) then
 
       --get the group this room belongs to
       local group = rooms[room]["group"]
       
       --switch the group
       groupSwitch(input, group, state)
-    else
-      --switch this room back to itself
-      --in the case of a button state being off, it gets switched on again, same input
-      --in the case of a button state being on, but the input not being valid it maintains the currentInput
+    else --if the input is not valid switch the button back off.
       roomSwitch(roomCurrentInput, room, true)
     end
   end
