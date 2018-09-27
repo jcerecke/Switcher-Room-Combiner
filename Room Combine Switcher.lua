@@ -5,7 +5,7 @@
 -- +64 27 2373 253
 -- September 2018
 
-local PluginInfo =
+PluginInfo =
 {
   Name = "Tools~Room Combine Switcher",
   Version = "0.91",
