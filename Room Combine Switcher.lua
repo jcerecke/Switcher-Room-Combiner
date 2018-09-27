@@ -13,7 +13,7 @@
 PluginInfo =
 {
 	Name = "Tools~Room Combine Switcher",
-	Version = "0.9",
+	Version = "0.91",
 	Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
 	Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
 	ShowDebug = true,
