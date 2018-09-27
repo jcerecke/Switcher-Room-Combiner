@@ -5,11 +5,6 @@
 -- +64 27 2373 253
 -- September 2018
 
--- TO DO: Output on a pin per room, the group number
--- TO DO: Output on multiple pins per group, the rooms T/F if they're part of that group
--- TO DO: Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
--- TO DO: Output/Input on a single pin all walls open & wall/room association info so downstream components don't need to run room finding algorithm.
-
 local PluginInfo =
 {
   Name = "Tools~Room Combine Switcher",
@@ -711,16 +706,17 @@ if Controls then
   function updateLEDs(group)
     print("function start updateLEDs("..tostring(group)..")")
     local groupMembers = groups[group]["members"]
+    local offColour = ledColours[#ledColours]
 
     --if there's more than 1 room in the group, all rooms must be in a combined state.
     local combinedState = #groupMembers > 1 and true or false
-    local color = #groupMembers % #ledColours
+    local color = #groupMembers % (#ledColours - 1)
     for _, room in ipairs(groupMembers) do
       Controls["Room LED"][room].Boolean = combinedState
       if combinedState then
         Controls["Room LED"][room].Color = ledColours[group]
       else
-        Controls["Room LED"][room].Color = "#7C0000"
+        Controls["Room LED"][room].Color = offColour
       end
     end
     print("function end updateLEDs")
@@ -949,6 +945,7 @@ if Controls then
     "LimeGreen",
     "Cyan",
     "DarkViolet",
+    "#7C0000", --default off colour
     }
   printtable("ledColours", ledColours)
     
