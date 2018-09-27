@@ -8,7 +8,6 @@
 -- TO DO: Output on a pin per room, the group number
 -- TO DO: Output on multiple pins per group, the rooms T/F if they're part of that group
 -- TO DO: Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
--- TO DO: Allow user to specify own colours as properties.
 -- TO DO: Output/Input on a single pin all walls open & wall/room association info so downstream components don't need to run room finding algorithm.
 
 PluginInfo =
@@ -18,109 +17,6 @@ PluginInfo =
 	Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
 	Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
 	ShowDebug = true,
-}
-
-LEDColours = {
-"Red",
-"LimeGreen",
-"Cyan",
-"DarkViolet",
-"Orchid",
-"SteelBlue",
-"Khaki",
-"LightSalmon",
-"Aquamarine",
-"Tomato",
-"Purple",
-"MidnightBlue",
-"SlateBlue",
-"Teal",
-"Thistle",
-"GreenYellow",
-"Blue",
-"MediumBlue",
-"DeepPink",
-"DeepSkyBlue",
-"Tan",
-"DarkBlue",
-"Plum",
-"Chocolate",
-"HotPink",
-"LightPink",
-"DarkSalmon",
-"SandyBrown",
-"PaleTurquoise",
-"Maroon",
-"DodgerBlue",
-"LightCoral",
-"MediumPurple",
-"Pink",
-"BurlyWood",
-"SpringGreen",
-"Aqua",
-"RoyalBlue",
-"SaddleBrown",
-"CadetBlue",
-"PowderBlue",
-"Gold",
-"DarkKhaki",
-"DarkRed",
-"MediumSeaGreen",
-"DarkGreen",
-"MediumVioletRed",
-"GoldenRod",
-"MediumOrchid",
-"Lime",
-"Olive",
-"Brown",
-"Green",
-"MediumSpringGreen",
-"DarkSlateBlue",
-"LightSteelBlue",
-"Orange",
-"DarkOrange",
-"LightSkyBlue",
-"Fuchsia",
-"Peru",
-"Yellow",
-"DarkOliveGreen",
-"BlueViolet",
-"PaleVioletRed",
-"DarkMagenta",
-"Sienna",
-"RosyBrown",
-"LightGreen",
-"ForestGreen",
-"DarkSeaGreen",
-"LightBlue",
-"Indigo",
-"Chartreuse",
-"MediumSlateBlue",
-"Navy",
-"FireBrick",
-"OrangeRed",
-"IndianRed",
-"MediumAquaMarine",
-"Crimson",
-"Salmon",
-"SeaGreen",
-"CornflowerBlue",
-"DarkTurquoise",
-"MediumTurquoise",
-"Coral",
-"DarkOrchid",
-"Turquoise",
-"OliveDrab",
-"SkyBlue",
-"Violet",
-"PaleGreen",
-"DarkGoldenRod",
-"LawnGreen",
-"DarkCyan",
-"YellowGreen",
-"RebeccaPurple",
-"LightSeaGreen",
-"Magenta",
 }
 
 function GetPrettyName(props)
@@ -156,10 +52,19 @@ function GetProperties()
 		},
 		{
 			Name = "Input Restriction",
-		    Type = "boolean",
-		    Value = false,
-		},
-	}
+		  Type = "boolean",
+		  Value = false,
+    },
+    {
+      Name = "Use Custom Colours",
+      Type = "boolean",
+      Value = false,
+    },
+    {
+      Name = "Custom Colours CSV",
+      Type = "string",
+    }
+  }
 	return props
 end
 
@@ -539,7 +444,13 @@ if Controls then
   end
   
   --\/\/  Helper Functions  \/\/--
-  
+
+  function split(str,pat)
+    local tbl = {}
+    str:gsub(pat, function(x) tbl[#tbl+1]=x end)
+    return tbl
+  end
+
   function printmap() --dev helper function
     local x = ""
     for w = 1, Properties["Walls"].Value do
@@ -805,13 +716,14 @@ if Controls then
   function updateLEDs(group)
     print("function start updateLEDs("..tostring(group)..")")
     local groupMembers = groups[group]["members"]
+
     --if there's more than 1 room in the group, all rooms must be in a combined state.
     local combinedState = #groupMembers > 1 and true or false
-    local color = #groupMembers % #LEDColours
+    local color = #groupMembers % #ledColours
     for _, room in ipairs(groupMembers) do
       Controls["Room LED"][room].Boolean = combinedState
       if combinedState then
-        Controls["Room LED"][room].Color = LEDColours[group]
+        Controls["Room LED"][room].Color = ledColours[group]
       else
         Controls["Room LED"][room].Color = "#7C0000"
       end
@@ -1036,6 +948,14 @@ if Controls then
   for r = 1, Properties["Rooms"].Value do
     updateRoomValidInputs(r)
   end
+
+  ledColours = Properties["Use Custom Colours"].Value == true and split(Properties["Custom Colours CSV"].Value, "[^,]*") or {
+    "Red",
+    "LimeGreen",
+    "Cyan",
+    "DarkViolet",
+    }
+  printtable("ledColours", ledColours)
     
   --/\/\  Declare Global Variables  /\/\--
 

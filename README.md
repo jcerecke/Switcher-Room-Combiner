@@ -5,7 +5,11 @@ This plugin mimics the room combiner component build into Q-SYS designer except 
 
 Known limits - the room combine algorithm can become big and hits the execution limit when numbers of rooms, walls or room/wall associations gets too great.
 
-# To dos:
+## Features
+* Restrict inputs per room with 3 different modes (Restrict mode, Allow mode, Bypass).  Combined rooms will also combine allowed inputs.
+* Choose your own LED colours!  If you use the room combiner component but want to use your own colours for the LEDs to match your palette, add them as a CSV string under properties.  Accepts any standard colour metadata strings in the form of "#RGB", "#RRGGBB", CSS Color Names, and HSV values using the format "!HHSSVV".
+
+## To dos:
 * Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
 * Set debug.sethook() to remove the execution limit after significant testing.
 * Allow user to specify own colours as properties (or at runtime?)
