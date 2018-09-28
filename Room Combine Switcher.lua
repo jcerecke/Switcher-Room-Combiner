@@ -8,7 +8,7 @@
 PluginInfo =
 {
   Name = "Tools~Room Combine Switcher",
-  Version = "0.92",
+  Version = "0.93",
   Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
   Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
   ShowDebug = true,
@@ -41,7 +41,7 @@ function GetProperties()
     {
       Name = "Inputs",
       Type = "integer",
-      Min = 2,
+      Min = 1,
       Max = 128,
       Value = 2,
     },
@@ -227,13 +227,23 @@ function GetControlLayout(props)
     tablePosY = tablePosY + buttonSize[y]
 
     for i = 1, inQty, 1 do
-      layout["Room "..r.." Input "..i] = {
-        Style = "Button",
-        ButtonStyle = "Toggle",
-        Size = buttonSize,
-        Position = { tablePosX, tablePosY },
-        PrettyName = "Room "..r.."~Input "..i,
-      }
+      if inQty > 1 then
+        layout["Room "..r.." Input "..i] = {
+          Style = "Button",
+          ButtonStyle = "Toggle",
+          Size = buttonSize,
+          Position = { tablePosX, tablePosY },
+          PrettyName = "Room "..r.."~Input "..i,
+        }
+      else
+        layout["Room "..r.." Input"] = {
+          Style = "Button",
+          ButtonStyle = "Toggle",
+          Size = buttonSize,
+          Position = { tablePosX, tablePosY },
+          PrettyName = "Room "..r.."~Input "..i,
+        }
+      end
       tablePosY = tablePosY + buttonSize[y]
     end
 
@@ -442,11 +452,12 @@ if Controls then
 
   --\/\/  Helper Functions  \/\/--
 
-  function split(str,pat)
-    local tbl = {}
-    str:gsub(pat, function(x) tbl[#tbl+1]=x end)
-    return tbl
-  end
+  function split(source, delimiters)
+    local elements = {}
+    local pattern = '([^'..delimiters..']+)'
+    string.gsub(source, pattern, function(value) elements[#elements + 1] = value; end);
+    return elements
+end
 
   function printmap() --dev helper function
     local x = ""
@@ -715,16 +726,22 @@ if Controls then
 
   function updateLEDs(group)
     print("function start updateLEDs("..tostring(group)..")")
+    printtable("ledColours", ledColours)
+    print("#ledColours", #ledColours)
     local groupMembers = groups[group]["members"]
-    local offColour = ledColours[#ledColours]
-
-    --if there's more than 1 room in the group, all rooms must be in a combined state.
+    --printtable("groupMembers", groupMembers)
+    local offColour = ledColours[#ledColours] --off colour is the last value.
+    print("offColor", offColour)
+    local colourIndex = (group - 1)  % (#ledColours - 1) + 1
+    print("colourIndex", colourIndex)
+    print("actual colour", ledColours[colourIndex])
     local combinedState = #groupMembers > 1 and true or false
-    local color = #groupMembers % (#ledColours - 1)
+
     for _, room in ipairs(groupMembers) do
+      --if there's more than 1 room in the group, rooms are combined.
       Controls["Room LED"][room].Boolean = combinedState
       if combinedState then
-        Controls["Room LED"][room].Color = ledColours[group]
+        Controls["Room LED"][room].Color = ledColours[colourIndex]
       else
         Controls["Room LED"][room].Color = offColour
       end
@@ -797,13 +814,14 @@ if Controls then
     local group = rooms[room]["group"]
     local roomCurrentInput = rooms[room]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
+    local toggleMode = Properties["Allow Toggle Off"].Value
     
-    --printtable("groupValidInputs", groupValidInputs)
+    printtable("groupValidInputs", groupValidInputs)
     --print(tablefind(groupValidInputs, input))
     --print(state and tablefind(groupValidInputs, input))
 
-    --if the user is allowed to switch to this input
-    if tablefind(groupValidInputs, input) then
+    --if the user is allowed to switch to this input the state is on or the toggleMode is on
+    if tablefind(groupValidInputs, input) and (state or toggleMode) then
 
       --get the group this room belongs to
       local group = rooms[room]["group"]
@@ -887,7 +905,15 @@ if Controls then
   
   bypass = "Bypass"
   restrict = "Restrict"
-  allow = "Allow"  
+  allow = "Allow"
+
+  ledColours = Properties["Use Custom Colours"].Value == true and split(Properties["Custom Colours CSV"].Value, ", ") or {
+    "Red",
+    "LimeGreen",
+    "Cyan",
+    "DarkViolet",
+    "#7C0000", --default off colour
+    }
   
   allInputs = {}
   for i = 1, Properties["Inputs"].Value do
@@ -903,17 +929,15 @@ if Controls then
     rooms[r] = {}
     groups[r] = {}
     
-    -- if there's something in the text box, use that, otherwise default to input 1
+    -- if there's something in the text box, use that, otherwise default to input nil
     rooms[r]["currentInput"] = Controls["Room Select"][r].String ~= "" and tonumber(Controls["Room Select"][r].String) or 1
     Controls["Room Select"][r].String = rooms[r]["currentInput"]
     
     rooms[r]["restrictionMode"] = Controls["Restrict Mode"][r].String == "" and bypass or Controls["Restrict Mode"][r].String
     Controls["Restrict Mode"][r].String = rooms[r]["restrictionMode"]
-    print("init restriction mode is "..rooms[r]["restrictionMode"])
     rooms[r]["restrictionInputs"], Controls["Restrict Inputs"][r].String = parseTextBox(Controls["Restrict Inputs"][r].String, Properties["Inputs"].Value)
     rooms[r]["group"] = r
     rooms[r]["validInputs"] = allInputs --initial assign to all rooms, then update to actual rooms below
-    
     
     Controls["Restrict Mode"][r].Choices = { bypass, restrict, allow }
     
@@ -947,13 +971,6 @@ if Controls then
     updateRoomValidInputs(r)
   end
 
-  ledColours = Properties["Use Custom Colours"].Value == true and split(Properties["Custom Colours CSV"].Value, "[^,]*") or {
-    "Red",
-    "LimeGreen",
-    "Cyan",
-    "DarkViolet",
-    "#7C0000", --default off colour
-    }
   printtable("ledColours", ledColours)
     
   --/\/\  Declare Global Variables  /\/\--
