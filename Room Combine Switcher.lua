@@ -7,8 +7,8 @@
 
 PluginInfo =
 {
-  Name = "Tools~Room Combine Switcher",
-  Version = "0.93",
+  Name = "Room Combiner Add-ons~Room Combine Switcher",
+  Version = "0.94",
   Id = "d2702557-f548-48bb-858d-d7c43f0ce5ee",
   Description = "Multi-room switcher that can be used for auxiliary switching in room combine installations",
   ShowDebug = true,
@@ -504,7 +504,7 @@ end
   --\/\/  Program Functions  \/\/--
 
   function groupInputSync(group)
-    print("function start", "groupInputSync", group)
+    --print("function start", "groupInputSync", group)
     local masterRoomInput = rooms[group]["currentInput"]
     local groupValidInputs = groups[group]["validInputs"]
 
@@ -518,9 +518,9 @@ end
   end
 
   function updateRoomValidInputs(room)
-    print("function start", "updateRoomValidInputs", room)
+    --print("function start", "updateRoomValidInputs", room)
     local mode = rooms[room]["restrictionMode"]
-    print("the restriction mode is "..mode)
+    --print("the restriction mode is "..mode)
 
     local totalInputs = Properties["Inputs"].Value
     local roomRestrictionInputs = rooms[room]["restrictionInputs"]
@@ -548,7 +548,7 @@ end
         end
       end
     end
-    printtable("function end\tupdateRoomValidInputs", roomValidInputs)
+    --printtable("function end\tupdateRoomValidInputs", roomValidInputs)
     rooms[room]["validInputs"] = roomValidInputs
 
     --pass this new info onto the group
@@ -556,7 +556,7 @@ end
   end    
 
   function updateGroupValidInputs(group)
-    print("function start", "updateGroupValidInputs", group)
+    --print("function start", "updateGroupValidInputs", group)
     --start with a blank table
     local groupValidInputs = {}
     local groupMembers = groups[group]["members"]
@@ -572,13 +572,13 @@ end
     end
 
     groups[group]["validInputs"] = groupValidInputs
-    printtable("function end\tupdateGroupValidInputs", groupValidInputs)
+    --printtable("function end\tupdateGroupValidInputs", groupValidInputs)
     --now that the valid inputs have been updated, let's check the group's current inputs for validity
     groupInputSync(group)
   end
 
   function roomSwitch(input, room, state) -- Create radio buttons.  Thanks to Callum Brieske.
-    print("function start", "roomSwitch", input, room, state)
+    --print("function start", "roomSwitch", input, room, state)
 
     input, room = tonumber(input), tonumber(room)
 
@@ -596,7 +596,7 @@ end
   end
 
   function groupSwitch(input, group, state)
-    print("function start", "groupSwitch", input, group, state)
+    --print("function start", "groupSwitch", input, group, state)
     --switch all rooms in this group to the input
 
     for _, room in ipairs(groups[group]["members"]) do
@@ -685,7 +685,7 @@ end
   end
 
   function getAdjacentRooms(room)
-    print("function start", "getAdjacentRooms", room)
+    --print("function start", "getAdjacentRooms", room)
     --print("function start on room"..room)
     local t = {}
     for wall, roomsTable in ipairs(map) do
@@ -702,12 +702,12 @@ end
         end
       end
     end
-    printtable("function end\tgetAdjacentRooms", t)
+    --printtable("function end\tgetAdjacentRooms", t)
     return t
   end
 
   function getStartingRooms(wall)
-    print("function start", "getStartingRooms", wall)
+    --print("function start", "getStartingRooms", wall)
     local t = {}
     if wall == 0 then -- special wall used on init, get all rooms
       for r = 1, Properties["Rooms"].Value do
@@ -720,21 +720,21 @@ end
         end
       end
     end
-    printtable("function end\tgetStartingRooms", t)
+    --printtable("function end\tgetStartingRooms", t)
     return t
   end
 
   function updateLEDs(group)
-    print("function start updateLEDs("..tostring(group)..")")
-    printtable("ledColours", ledColours)
-    print("#ledColours", #ledColours)
+    --print("function start updateLEDs("..tostring(group)..")")
+    --printtable("ledColours", ledColours)
+    --print("#ledColours", #ledColours)
     local groupMembers = groups[group]["members"]
     --printtable("groupMembers", groupMembers)
     local offColour = ledColours[#ledColours] --off colour is the last value.
-    print("offColor", offColour)
+    --print("offColor", offColour)
     local colourIndex = (group - 1)  % (#ledColours - 1) + 1
-    print("colourIndex", colourIndex)
-    print("actual colour", ledColours[colourIndex])
+    --print("colourIndex", colourIndex)
+    --print("actual colour", ledColours[colourIndex])
     local combinedState = #groupMembers > 1 and true or false
 
     for _, room in ipairs(groupMembers) do
@@ -746,11 +746,11 @@ end
         Controls["Room LED"][room].Color = offColour
       end
     end
-    print("function end updateLEDs")
+    --print("function end updateLEDs")
   end
   
   function findRoomGroups(wall)
-    print("function start", "findRoomGroups", wall)
+    --print("function start", "findRoomGroups", wall)
     
     local unvisitedRooms = getStartingRooms(wall)
     
@@ -793,7 +793,7 @@ end
       
       updateLEDs(group)
       
-      printtable("function end\tfindRoomGroups\t"..tostring(group), currentGroup)
+      --printtable("function end\tfindRoomGroups\t"..tostring(group), currentGroup)
       
       updateGroupValidInputs(group)
       --printtable("group "..currentGroup[1].." contains:", currentGroup)
@@ -808,7 +808,7 @@ end
 
   function userSwitch(input, room, state)
     input, room = tonumber(input), tonumber(room)
-    print("function start", "userSwitch", input, room, state)
+    --print("function start", "userSwitch", input, room, state)
     --user has requested to switch inputs
     
     local group = rooms[room]["group"]
@@ -816,7 +816,7 @@ end
     local groupValidInputs = groups[group]["validInputs"]
     local toggleMode = Properties["Allow Toggle Off"].Value
     
-    printtable("groupValidInputs", groupValidInputs)
+    --printtable("groupValidInputs", groupValidInputs)
     --print(tablefind(groupValidInputs, input))
     --print(state and tablefind(groupValidInputs, input))
 
@@ -834,7 +834,7 @@ end
   end
   
   function userRestrictModeChange(room, mode)
-    print("function start", "userRestrictModeChange", room, mode)
+    --print("function start", "userRestrictModeChange", room, mode)
     
     --local group = rooms[room]["group"]
     
@@ -846,7 +846,7 @@ end
   end
   
   function userRestrictInputsChange(room, inputsTextBox)
-    print("function start", "userRestrictInputsChange", room, inputsTextBox)
+    --print("function start", "userRestrictInputsChange", room, inputsTextBox)
     local inputQty = Properties["Inputs"].Value
     
     --parse text
@@ -862,7 +862,7 @@ end
   end
   
   function userWallOpenChange(wall, state)
-    print("function start", "userWallOpenChange", wall, state)
+    --print("function start", "userWallOpenChange", wall, state)
     
     --update global variable
     wallsState[wall] = state
@@ -953,7 +953,7 @@ end
   local walls = {} --only used for init
   wallsState = {} --wallsState[wallNo]
   for w = 1, Properties["Walls"].Value do
-    walls[w], Controls["Wall Rooms"][w].String = parseTextBox(Controls["Wall Rooms"][w].String, Properties["Walls"].Value)
+    walls[w], Controls["Wall Rooms"][w].String = parseTextBox(Controls["Wall Rooms"][w].String, Properties["Rooms"].Value)
     wallsState[w] = Controls["Wall Opens"][w].Boolean
     map[w] = {}
     for r = 1, Properties["Rooms"].Value do
@@ -971,7 +971,6 @@ end
     updateRoomValidInputs(r)
   end
 
-  printtable("ledColours", ledColours)
     
   --/\/\  Declare Global Variables  /\/\--
 
