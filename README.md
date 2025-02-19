@@ -12,7 +12,5 @@ Known limits - the room combine algorithm can become big and hits the execution 
 
 ## To dos:
 * Optimise findRoomGroups() function to allow more rooms to work without hitting execution limit.
-* Set debug.sethook() to remove the execution limit after significant testing.
 * Output/Input on a single pin all walls open & wall/room association info so downstream plugins don't need to run room finding algorithm.
-
-* New property - "Default inputs" - will show new controls to specify a single input to become the default when a room is uncombined.
+* New feature - "Default inputs" - will show new controls to specify a single input to become the default when a room is uncombined.
